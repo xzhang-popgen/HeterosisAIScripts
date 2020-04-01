@@ -3,7 +3,7 @@
 """
 Created on Fri Oct 18 17:44:17 2019
 
-This script takes inputs from command line that specify the following parameters: 
+Description: This script takes inputs from command line that specify the following parameters: 
 
 genomic segment, demographic model, population growth pattern in recipient population, 
 dominance coefficient for deleterious mutations, whether a human hs relationship is used, 
