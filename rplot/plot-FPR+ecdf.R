@@ -121,12 +121,12 @@ for(g in 1:length(genes)){
         stat_sims <- stat_sims[complete.cases(stat_sims)]
         
         if (s!=5){
-          fpr_neu_s <- length(stat_sims[stat_sims>=stat_neu])/total
-          fpr_neg_s <- length(stat_sims[stat_sims>=stat_neg])/total
+          fpr_neu_s <- length(stat_sims[stat_sims>stat_neu])/total
+          fpr_neg_s <- length(stat_sims[stat_sims>stat_neg])/total
         }
         else{
-          fpr_neu_s <- length(stat_sims[stat_sims<=stat_neu])/total
-          fpr_neg_s <- length(stat_sims[stat_sims<=stat_neg])/total
+          fpr_neu_s <- length(stat_sims[stat_sims<stat_neu])/total
+          fpr_neg_s <- length(stat_sims[stat_sims<stat_neg])/total
         }
         
         fpr_neg_w <- c(fpr_neg_w,fpr_neg_s)
@@ -189,12 +189,12 @@ for(g in 1:length(genes)){
         stat_sims <- stat_sims[complete.cases(stat_sims)]
         
         if (s!=5){
-          fpr_neu_s <- length(stat_sims[stat_sims>=stat_neu])/total
-          fpr_neg_s <- length(stat_sims[stat_sims>=stat_neg])/total
+          fpr_neu_s <- length(stat_sims[stat_sims>stat_neu])/total
+          fpr_neg_s <- length(stat_sims[stat_sims>stat_neg])/total
         }
         else{
-          fpr_neu_s <- length(stat_sims[stat_sims<=stat_neu])/total
-          fpr_neg_s <- length(stat_sims[stat_sims<=stat_neg])/total
+          fpr_neu_s <- length(stat_sims[stat_sims<stat_neu])/total
+          fpr_neg_s <- length(stat_sims[stat_sims<stat_neg])/total
         }
         
         fpr_neg_w <- c(fpr_neg_w,fpr_neg_s)
