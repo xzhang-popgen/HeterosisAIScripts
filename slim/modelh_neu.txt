@@ -1,0 +1,205 @@
+initialize() {
+	defineConstant("growth", 1); //1=small; 2=large; 3=with cap; 4=exponential
+	defineConstant("dominance", 0); //deleterious recessive = 0; additive = 0.5; 
+	defineConstant("hs", 0); //recessive or additive = 0; partial (hs relationship) = 1; 
+	defineConstant("n", 10); //scaling factor
+	defineConstant("m4s", 0.0*n); //if m4s>0, adaptive introgression; else, deleterious null
+
+    initializeMutationRate(1.5e-8*n);
+	initializeTreeSeq();
+	//nonsynonymous drawn from a DFE from Kim et al.
+    //initializeMutationType("m1", dominance, "g", -0.01314833*n, 0.186);
+	initializeMutationType("m1", 0.0, "f", 0.5); //include only neutral here
+	//noncoding -- assumed neutral here
+	initializeMutationType("m3", 0.0, "f", 0.0);
+	//beneficial -- for the time being, is left out
+	initializeMutationType("m4", 0.0, "f", m4s);	
+	//genomic element: exon and uses a mixture of syn and nonsyn at a 1:2.31 ratio (Huber et al.)
+	initializeGenomicElementType("g1", c(m1), c(1.0));
+	//genomic element: intron
+	initializeGenomicElementType("g2", c(m3), c(1.0));
+	//genomic element: intergenic
+	initializeGenomicElementType("g3", c(m3), c(1.0));	
+    //read in exon and recomb info
+    info_lines = readFile("/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/regions/sim_seq_info_bnc2.txt");  
+
+    //exons
+    for (line in info_lines[substr(info_lines, 0, 2) == "exo"])
+    {
+        components = strsplit(line, " ");
+        exon_starts = asInteger(components[1]);
+        exon_ends = asInteger(components[2]);
+        initializeGenomicElement(g1, exon_starts, exon_ends);
+    }
+
+
+    for (line in info_lines[substr(info_lines, 0, 2) == "cnc"])
+    {
+        components = strsplit(line, " ");
+        cnc_starts = asInteger(components[1]);
+        cnc_ends = asInteger(components[2]);
+        initializeGenomicElement(g3, cnc_starts, cnc_ends);
+    }
+
+    for (line in info_lines[substr(info_lines, 0, 2) == "neu"])
+    {
+        components = strsplit(line, " ");
+        neu_starts = asInteger(components[1]);
+        neu_ends = asInteger(components[2]);
+        initializeGenomicElement(g2, neu_starts, neu_ends);
+    }
+   
+	// one recombination rate
+	//initializeRecombinationRate(1e-9*10);
+	        //recombination
+    rec_ends = NULL;
+    rec_rates = NULL;
+    for (line in info_lines[substr(info_lines, 0, 2) == "rec"])
+    {
+        components = strsplit(line, " ");
+        rec_ends = c(rec_ends, asInteger(components[1]));
+        rec_rates = c(rec_rates, asFloat(components[2]));
+    }
+    //multiply rec rates by scaling factor
+    initializeRecombinationRate(0.5*(1-(1-2*rec_rates)^n), rec_ends);
+}
+
+
+
+//burn in
+1 early() {
+    defineConstant("simnum", getSeed());
+    setSeed(getSeed() + 27126);
+    sim.addSubpop("p1", 7300/n); 
+    //m2.convertToSubstitution = T;
+}
+
+//hs relationship
+1:8900 fitness(m1) {
+	if (hs ==1){ 
+    	h = (0.5)/(1 - 7071.07*(mut.selectionCoeff/n));
+    	if (homozygous) {
+        	return ((1.0 + 0.5*mut.selectionCoeff)*(1.0 + 0.5*mut.selectionCoeff));
+    	} 
+    	else {
+        	return (1.0 + mut.selectionCoeff * h);
+    	}
+   }
+}
+ 
+
+7300 early() { // p2 = Neanderthal
+    p1.setSubpopulationSize(7300/n);    
+    sim.addSubpopSplit("p2", 1000/n, p1);    
+	p1.setMigrationRates(c(p2),c(0.0)); //migration rate INTO p1
+	p2.setMigrationRates(c(p1),c(0.0)); //migration rate INTO p2
+	
+}
+
+7400 late() { 
+	if(m4s != 0.0){
+		sim.outputFull("/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidates/temp/" + simnum + ".txt"); 
+		target = sample(p2.genomes, 1); 
+		target.addNewDrawnMutation(m4, 2500000); //random mutation in the middle of the segment
+	}
+} 
+
+7400: late() { 
+	if(m4s != 0.0){
+		mut = sim.mutationsOfType(m4); 
+		if (size(mut) == 1) { 
+			if (sim.mutationFrequencies(NULL, mut) > 0.1) { 
+				sim.deregisterScriptBlock(self); 
+			} 
+		} 
+		else { 
+			sim.readFromPopulationFile("/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidates/temp/" + simnum + ".txt"); 
+			setSeed(getSeed() + 1); 
+			target = sample(p2.genomes, 1); 
+			target.addNewDrawnMutation(m4, 2500000); 
+		} 
+	}
+} 
+
+
+8340 early() {
+    p1.setSubpopulationSize(14470/n);
+}
+
+8696 early() { //p3 = Asian-Eur
+    sim.addSubpopSplit("p3", 1860/n, p1);
+    p3.setMigrationRates(c(p1, p2), c(0.00015, 0));
+}
+
+8739 late() {
+	sim.treeSeqRememberIndividuals(sim.subpopulations.individuals);
+	p1.outputMSSample(100); //african
+	p2.outputMSSample(100); //nea 
+	p3.outputMSSample(100); //pre-admixed asian 
+    sim.addSubpopSplit("p4", 1860/n, p1);
+    p4.setMigrationRates(c(p1,p2,p3), c(0.0, 0.1, 0.9)); //p4 = admixed Asian; 10% admixture
+    
+}
+
+
+8740 late() {
+    p4.setMigrationRates(c(p1,p2,p3), c(0.00015, 0.0, 0.0));
+    p3.setSubpopulationSize(0); //remove pre-admixed ones
+}
+
+
+// Asian founder bottleneck
+8808 early() {
+    p4.setSubpopulationSize(550/n);
+    p1.setMigrationRates(c(p4), c(7.8e-06));
+    p4.setMigrationRates(c(p1), c(7.8e-06));
+}
+
+// Asian exponential growth
+8808:8900 {
+
+if (growth ==1)
+{
+    newSize = 550/n;
+    p4.setSubpopulationSize(newSize);
+}
+else if (growth ==2){
+    newSize = 41080/n;
+    p4.setSubpopulationSize(newSize);
+}    
+
+else if (growth ==3){
+    newSize = 7300/n;
+    p4.setSubpopulationSize(newSize);
+} 
+
+else if (growth ==4){
+    newSize = asInteger(round(1.048^(sim.generation - asInteger(88080/n)) * 550/n));
+    p4.setSubpopulationSize(newSize);
+} 
+
+
+}
+
+8900 late() {
+	p1.outputMSSample(100); //archaic 
+	p2.outputMSSample(100); //african 
+	p4.outputMSSample(100); //non-african 
+    sim.treeSeqOutput("/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidates/tree/neu_mh.trees");
+    if (m4s != 0.0){
+        p4g = p4.genomes;
+		adapt = sim.mutationsOfType(m4);
+		hasAdapt = p4g.containsMutations(adapt);
+		containing = p4g[hasAdapt];
+		p4ind = containing.size();
+		catn("FREQm4_1: " + p4ind/p4g.size());
+    }
+}
+
+
+
+
+
+
+
+
