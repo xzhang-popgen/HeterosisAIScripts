@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Created on Tue Mar 31 22:33:20 2020
+
+@author: xinjunzhang
+"""
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
 Created on Fri Oct 18 17:44:17 2019
 
-Description: This script takes inputs from command line that specify the following parameters: 
+This script takes inputs from command line that specify the following parameters: 
 
 genomic segment, demographic model, population growth pattern in recipient population, 
 dominance coefficient for deleterious mutations, whether a human hs relationship is used, 
@@ -15,7 +23,7 @@ adaptive introgression summary statistics in non-overlapping 50kb windows
 @author: xinjunzhang
 """
 
-import msprime, pyslim, os, random, pandas, sys, itertools,argparse,glob,matplotlib.pyplot,re
+import pyslim, os, random, itertools,argparse,glob,matplotlib.pyplot
 import numpy as np
 from multiprocessing import Manager, Pool
 
@@ -70,9 +78,9 @@ def ancestry_p_varies(ts,pop,nsize,duration,model): #pop=source pop
     mixtime=duration
     p = [x.id for x in ts.nodes() if ((x.population == int(pop)) and (x.time == mixtime))] #source pop
     if model ==1:
-    	today = [x.id for x in ts.nodes() if ((x.population == 4) and (x.time == 0))] #assuming p4 is recipient
-	elif model ==0:
-		today = [x.id for x in ts.nodes() if ((x.population == 3) and (x.time == 0))]
+        today = [x.id for x in ts.nodes() if ((x.population == 4) and (x.time == 0))] #assuming p4 is recipient
+    elif model ==0:
+        today = [x.id for x in ts.nodes() if ((x.population == 3) and (x.time == 0))]
 
     tree_p = [sum([t.num_tracked_samples(u) for u in p])/n
                for t in ts.trees(tracked_samples=today, sample_counts=True)]
@@ -208,7 +216,7 @@ def calc_derived_freq (pop_hap):
     popfreq = popfreq/ float(pop_hap.shape[0])
     return popfreq
 
-def vSumFunc(other_hap, currentArchi):
+def vSumFunc(other_hap, currentArchi,p1_hapw):
 	current_hap = np.array([p1_hapw[currentArchi,]])
 	div = np.zeros(other_hap.shape)
 	ones = np.ones((other_hap.shape[0],1))
@@ -309,9 +317,9 @@ def calc_stats (file_path,len_genome,adm_gen,end_gen):
             divratio = []
 
             for archi in range(0, p1_hapw.shape[0]): #iterate over 0-99 haps; 100 total
-                divarchintro = vSumFunc(p3_hapw, archi)
+                divarchintro = vSumFunc(p3_hapw, archi,p1_hapw)
                 divarchintro = divarchintro.astype("float")
-                divarchnonintro = vSumFunc(p2_hapw, archi)
+                divarchnonintro = vSumFunc(p2_hapw, archi,p1_hapw)
         
                 divarchnonintro = divarchnonintro.astype("float")      
                 for comb in itertools.product(divarchintro,divarchnonintro): 
@@ -376,87 +384,88 @@ def update_par_file(region_name,temp_par, new_par,model,growth,dominance,nscale,
         fields = line.split()
         
         if model ==0:        
-        	if line_counter==1:
-        		fields[1] = str(dominance)+");"
-        	elif line_counter==2:
-        		fields[1] = str(nscale)+");"
-        	elif line_counter==3:
-        		fields[1] = str(m4s)+"*n);"
-        	elif line_counter==25:
-            	fields[2] = 'readFile("/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/regions/sim_seq_info_'+str(region_name)+'.txt");'
-        	elif line_counter==78:
-        		fields[0] = str(int(100000/nscale))
-        	elif line_counter==88:
-        		fields[0] = str(int(100100/nscale))
-        	elif line_counter==96:
-        		fields[0] = str(int(100100/nscale))+":"
-        	elif line_counter==113:
-        		fields[0] = str(int(110000/nscale))
-        	elif line_counter==115:
-        		fields[0] = str(int(110000/nscale))
-        	elif line_counter==121:
-        		fields[0] = str(int(119950/nscale))
-        	elif line_counter==124:
-        		fields[0] = str(int(120000/nscale -1))
-        	elif line_counter==133:
-        		fields[0] = str(int(120000/nscale))
-        	elif line_counter==138:
-        		fields[0] = str(int(120000/nscale +1))
-        	elif line_counter==146:
-        		fields[0] = str(int(130000/nscale))        		        		
-        	elif line_counter==150:
-            	fields[0] = 'sim.treeSeqOutput("/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidates/tree/'+str(region_name)+'_m0.trees");'
-        	new_line=str()    
-        	for item in fields:
-            	new_line = new_line+item+" "
-        	newfile.write(new_line+'\n')
+            if line_counter==1:
+                fields[1] = str(dominance)+");"
+            elif line_counter==2:
+                fields[1] = str(nscale)+");"
+            elif line_counter==3:
+                fields[1] = str(m4s)+"*n);"
+            elif line_counter==25:
+                fields[2] = 'readFile("/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/regions/sim_seq_info_'+str(region_name)+'.txt");'
+            elif line_counter==78:
+                fields[0] = str(int(100000/nscale))
+            elif line_counter==88:
+                fields[0] = str(int(100100/nscale))
+            elif line_counter==96:
+                fields[0] = str(int(100100/nscale))+":"
+            elif line_counter==113:
+                fields[0] = str(int(110000/nscale))
+            elif line_counter==115:
+                fields[0] = str(int(110000/nscale))
+            elif line_counter==121:
+                fields[0] = str(int(119950/nscale))
+            elif line_counter==124:
+                fields[0] = str(int(120000/nscale -1))
+            elif line_counter==133:
+                fields[0] = str(int(120000/nscale))
+            elif line_counter==138:
+                fields[0] = str(int(120000/nscale +1))
+            elif line_counter==146:
+                fields[0] = str(int(130000/nscale))        		        		
+            elif line_counter==150:
+                fields[0] = 'sim.treeSeqOutput("/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidates/tree/'+str(region_name)+'_m0.trees");'
+            
+            new_line=str()    
+            for item in fields:
+                new_line = new_line+item+" "
+            newfile.write(new_line+'\n')
 
         elif model ==1:   #modelh     
-        	if line_counter==1:
-        		fields[1] = str(int(growth))+");"
-        	elif line_counter==2:
-        	    fields[1] = str(dominance)+");" 
-        	elif line_counter==3:
-        	    fields[1] = str(hs)+");"        	           		
-        	elif line_counter==4:
-        		fields[1] = str(nscale)+");"
-        	elif line_counter==5:
-        		fields[1] = str(m4s)+"*n);"
-        	elif line_counter==23:
-            	fields[2] = 'readFile("/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/regions/sim_seq_info_'+str(region_name)+'.txt");'        		
-        	elif line_counter==77:
-        		fields[0] = "1:"+str(int(89000/nscale))
-        	elif line_counter==90:
-        		fields[0] = str(int(73000/nscale))
-        	elif line_counter==98:
-        		fields[0] = str(int(74000/nscale))
-        	elif line_counter==102:
-        		fields[1] = str(int(insert_ai))+");"
-        	elif line_counter==106:
-        		fields[0] = str(int(74000/nscale)) + ":"
-        	elif line_counter==118:
-        		fields[1] = str(int(insert_ai))+");"
-        	elif line_counter==124:
-        		fields[0] = str(int(83400/nscale))
-        	elif line_counter==128:
-        		fields[0] = str(int(86960/nscale))
-        	elif line_counter==133:
-        		fields[0] = str(int(87400/nscale - 1))       		
-        	elif line_counter==144:
-        		fields[0] = str(int(87400/nscale))       		
-        	elif line_counter==151:
-        		fields[0] = str(int(88080/nscale))
-        	elif line_counter==158:
-        		fields[0] = str(int(88080/nscale))+ ":"+str(int(89000/nscale))
-        	elif line_counter==183:
-        		fields[0] = str(int(89000/nscale))        		
-        	elif line_counter==187:
-            	fields[0] = 'sim.treeSeqOutput("/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidatesh/tree/'+str(region_name)+'_mh.trees");'
+            if line_counter==1:
+                fields[1] = str(int(growth))+");"
+            elif line_counter==2:
+                fields[1] = str(dominance)+");" 
+            elif line_counter==3:
+                fields[1] = str(hs)+");"        	           		
+            elif line_counter==4:
+                fields[1] = str(nscale)+");"
+            elif line_counter==5:
+                fields[1] = str(m4s)+"*n);"
+            elif line_counter==23:
+                fields[2] = 'readFile("/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/regions/sim_seq_info_'+str(region_name)+'.txt");'        		
+            elif line_counter==77:
+                fields[0] = "1:"+str(int(89000/nscale))
+            elif line_counter==90:
+                fields[0] = str(int(73000/nscale))
+            elif line_counter==98:
+                fields[0] = str(int(74000/nscale))
+            elif line_counter==102:
+                fields[1] = str(int(insert_ai))+");"
+            elif line_counter==106:
+                fields[0] = str(int(74000/nscale)) + ":"
+            elif line_counter==118:
+                fields[1] = str(int(insert_ai))+");"
+            elif line_counter==124:
+                fields[0] = str(int(83400/nscale))
+            elif line_counter==128:
+                fields[0] = str(int(86960/nscale))
+            elif line_counter==133:
+                fields[0] = str(int(87400/nscale - 1))       		
+            elif line_counter==144:
+                fields[0] = str(int(87400/nscale))       		
+            elif line_counter==151:
+                fields[0] = str(int(88080/nscale))
+            elif line_counter==158:
+                fields[0] = str(int(88080/nscale))+ ":"+str(int(89000/nscale))
+            elif line_counter==183:
+                fields[0] = str(int(89000/nscale))        		
+            elif line_counter==187:
+                fields[0] = 'sim.treeSeqOutput("/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidatesh/tree/'+str(region_name)+'_mh.trees");'
         	
-        	new_line=str()    
-        	for item in fields:
-            	new_line = new_line+item+" "
-        	newfile.write(new_line+'\n')
+            new_line=str()    
+            for item in fields:
+                new_line = new_line+item+" "
+            newfile.write(new_line+'\n')
 
     
     newfile.close()
@@ -505,33 +514,34 @@ def run_slim_variable(n,q,r,dominance,nscale,m4s,model,growth,hs,insert_ai):
      
     
     if model ==1:  
-    	if dominance !=2:  
-    		temp_par = "/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidates/slim/modelh_neg.txt"
-    	elif dominance == 2:
-    		temp_par = "/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidates/slim/modelh_neu.txt"
-    	adm_gen = (87400-1)/nscale
-    	end_gen = 89000/nscale
-    	t_end = 1600/nscale -1    	
-    	popsize=41080/nscale #recipient population size at the end of simulation
+        if dominance !=2:  
+            temp_par = "/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidates/slim/modelh_neg.txt"
+        elif dominance == 2:
+            temp_par = "/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidates/slim/modelh_neu.txt"
+        adm_gen = (87400-1)/nscale
+        end_gen = 89000/nscale
+        t_end = 1600/nscale -1    	
+        popsize=41080/nscale #recipient population size at the end of simulation
 
-    	if growth ==1:
-        	popsize = 550/nscale
-    	elif growth ==2: 
-        	popsize = 41080/nscale
-    	elif growth ==3: 
-        	popsize = 7300/nscale
-    	elif growth ==4: 
-        	popsize = 41080/nscale
+        if growth ==1:
+            popsize = 550/nscale
+        elif growth ==2: 
+            popsize = 41080/nscale
+        elif growth ==3: 
+            popsize = 7300/nscale
+        elif growth ==4: 
+            popsize = 41080/nscale
 
     if model==0:
         if dominance !=2:  
-    		temp_par = "/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidates/slim/model0_neg.txt"
-    	elif dominance == 2:
-    		temp_par = "/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidates/slim/model0_neu.txt"
-    	adm_gen = 120000/nscale - 1
-    	end_gen = 130000/nscale
-    	t_end = 10000/nscale
-    	popsize=1000/nscale
+            temp_par = "/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidates/slim/model0_neg.txt"
+        elif dominance == 2:
+            temp_par = "/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidates/slim/model0_neu.txt"
+        
+        adm_gen = 120000/nscale - 1
+        end_gen = 130000/nscale
+        t_end = 10000/nscale
+        popsize=1000/nscale
 
 
     new_par = DIR_par +"par_"+region_name+str(dominance)+str(model)+ str(n)+".txt"
@@ -543,14 +553,12 @@ def run_slim_variable(n,q,r,dominance,nscale,m4s,model,growth,hs,insert_ai):
     os.system('/u/home/x/xinjunzh/slim_build/slim %s > %s' %(new_par ,slim_output))
     
     treepath = DIR_tree+str(region_name)+str(dominance)+'.trees'
-	
-	if model==1:
-    	meanp1 = calc_p1ancestry(treepath,2,popsize,t_end,model)
-    	ancestry_position_writeout(treepath,n,2,popsize,t_end,region_name) #write out ancestry info
-
-	elif model==0:
-    	meanp1 = calc_p1ancestry(treepath,1,popsize,t_end,model)
-    	ancestry_position_writeout(treepath,n,1,popsize,t_end,region_name) 
+    if model==1:
+        meanp1 = calc_p1ancestry(treepath,2,popsize,t_end,model)
+        ancestry_position_writeout(treepath,n,2,popsize,t_end,region_name) #write out ancestry info
+    elif model==0:
+        meanp1 = calc_p1ancestry(treepath,1,popsize,t_end,model)
+        ancestry_position_writeout(treepath,n,1,popsize,t_end,region_name) 
     
     
     pos_start,pos_end,freqp4_before,freqp4_after,Dstat_list, fD_list, Het_list, divratioavg_list,Q_1_100_q95_list,Q_1_100_q90_list,Q_1_100_max_list,U_1_0_100_list,U_1_20_100_list,U_1_50_100_list,U_1_80_100_list = calc_stats(slim_output,segsize,adm_gen,end_gen)
@@ -600,8 +608,8 @@ if __name__=='__main__':
 
     region_all = ["chr11max","chr19region","chr3region","galnt18","hla","hyal2","krt71","nlrc5","oca2","pde6c","pou2f3","rnf34","sema6d","sgcb","sgcz","sipa1l2","slc16a11","slc19a3","slc5a10","stat2","tbx15","tlr1610","tnfa1p3","txn"]
 	
-	DIR_region = "/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/regions/"
-	DIR_anc = "/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidates/ancestry/"
+    DIR_region = "/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/regions/"
+    DIR_anc = "/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidates/ancestry/"
     DIR_out = "/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidates/output/"
     DIR_tree = "/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidates/tree/"
     DIR_par = "/u/home/x/xinjunzh/data/Slim_3/calculate_sumstats/sim_candidates/slim/"
