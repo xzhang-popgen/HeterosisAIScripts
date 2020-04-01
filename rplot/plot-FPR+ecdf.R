@@ -121,8 +121,14 @@ for(g in 1:length(genes)){
         stat_sims <- stat_sims[complete.cases(stat_sims)]
         
         if (s!=5){
-          fpr_neu_s <- length(stat_sims[stat_sims>stat_neu])/total
-          fpr_neg_s <- length(stat_sims[stat_sims>stat_neg])/total
+          if (s ==2 & stat_neu==1){ #for D stat's critical value being the most extreme value
+            fpr_neu_s <- length(stat_sims[stat_sims>=stat_neu])/total
+            fpr_neg_s <- length(stat_sims[stat_sims>=stat_neg])/total
+          }
+          else{
+            fpr_neu_s <- length(stat_sims[stat_sims>stat_neu])/total
+            fpr_neg_s <- length(stat_sims[stat_sims>stat_neg])/total
+          }
         }
         else{
           fpr_neu_s <- length(stat_sims[stat_sims<stat_neu])/total
@@ -189,8 +195,14 @@ for(g in 1:length(genes)){
         stat_sims <- stat_sims[complete.cases(stat_sims)]
         
         if (s!=5){
-          fpr_neu_s <- length(stat_sims[stat_sims>stat_neu])/total
-          fpr_neg_s <- length(stat_sims[stat_sims>stat_neg])/total
+          if (s ==2 & stat_neu==1){ #for D stat's critical value being the most extreme value
+            fpr_neu_s <- length(stat_sims[stat_sims>=stat_neu])/total
+            fpr_neg_s <- length(stat_sims[stat_sims>=stat_neg])/total
+          }
+          else{
+            fpr_neu_s <- length(stat_sims[stat_sims>stat_neu])/total
+            fpr_neg_s <- length(stat_sims[stat_sims>stat_neg])/total
+          }
         }
         else{
           fpr_neu_s <- length(stat_sims[stat_sims<stat_neu])/total
