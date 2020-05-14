@@ -70,7 +70,7 @@ initialize() {
 1 early() {
     defineConstant("simnum", getSeed());
     setSeed(getSeed() + 27126);
-    sim.addSubpop("p1", 7300/n); 
+    sim.addSubpop("p1", asInteger(7300/n)); 
     //m2.convertToSubstitution = T;
 }
 
@@ -89,8 +89,8 @@ initialize() {
  
 
 7300 early() { // p2 = Neanderthal
-    p1.setSubpopulationSize(7300/n);    
-    sim.addSubpopSplit("p2", 1000/n, p1);    
+    p1.setSubpopulationSize(asInteger(7300/n));    
+    sim.addSubpopSplit("p2", asInteger(1000/n), p1);    
 	p1.setMigrationRates(c(p2),c(0.0)); //migration rate INTO p1
 	p2.setMigrationRates(c(p1),c(0.0)); //migration rate INTO p2
 	
@@ -123,11 +123,11 @@ initialize() {
 
 
 8340 early() {
-    p1.setSubpopulationSize(14470/n);
+    p1.setSubpopulationSize(asInteger(14470/n));
 }
 
 8696 early() { //p3 = Asian-Eur
-    sim.addSubpopSplit("p3", 1860/n, p1);
+    sim.addSubpopSplit("p3", asInteger(1860/n), p1);
     p3.setMigrationRates(c(p1, p2), c(0.00015, 0));
 }
 
@@ -136,7 +136,7 @@ initialize() {
 	p1.outputMSSample(100); //african
 	p2.outputMSSample(100); //nea 
 	p3.outputMSSample(100); //pre-admixed asian 
-    sim.addSubpopSplit("p4", 1860/n, p1);
+    sim.addSubpopSplit("p4", asInteger(1860/n), p1);
     p4.setMigrationRates(c(p1,p2,p3), c(0.0, 0.1, 0.9)); //p4 = admixed Asian; 10% admixture
     
 }
@@ -150,7 +150,7 @@ initialize() {
 
 // Asian founder bottleneck
 8808 early() {
-    p4.setSubpopulationSize(550/n);
+    p4.setSubpopulationSize(asInteger(550/n));
     p1.setMigrationRates(c(p4), c(7.8e-06));
     p4.setMigrationRates(c(p1), c(7.8e-06));
 }
@@ -160,16 +160,16 @@ initialize() {
 
 if (growth ==1)
 {
-    newSize = 550/n;
+    newSize = asInteger(550/n);
     p4.setSubpopulationSize(newSize);
 }
 else if (growth ==2){
-    newSize = 41080/n;
+    newSize = asInteger(41080/n);
     p4.setSubpopulationSize(newSize);
 }    
 
 else if (growth ==3){
-    newSize = 7300/n;
+    newSize = asInteger(7300/n);
     p4.setSubpopulationSize(newSize);
 } 
 
