@@ -73,7 +73,7 @@ initialize() {
     defineConstant("simnum", getSeed());
     setSeed(getSeed() + 27126);
     sim.addSubpop("p1", asInteger(10000/n));
-    //m2.convertToSubstitution = T;
+    m1.convertToSubstitution = T;
 }
 
 10000 early() { // after burn-in, split populations into two: p1 and p2
