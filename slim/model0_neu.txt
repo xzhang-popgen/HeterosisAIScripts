@@ -72,13 +72,13 @@ initialize() {
 1 early() {
     defineConstant("simnum", getSeed());
     setSeed(getSeed() + 27126);
-    sim.addSubpop("p1", 10000/n);
-    m2.convertToSubstitution = T;
+    sim.addSubpop("p1", asInteger(10000/n));
+    //m2.convertToSubstitution = T;
 }
 
 10000 early() { // after burn-in, split populations into two: p1 and p2
-    sim.addSubpopSplit("p2", 10000/n, p1);
-    p1.setSubpopulationSize(10000/n);
+    sim.addSubpopSplit("p2", asInteger(10000/n), p1);
+    p1.setSubpopulationSize(asInteger(10000/n));
     
     // this also isnt necessary, but sets the migration rates to 0
 	p1.setMigrationRates(c(p2),c(0.0)); //migration rate INTO p1
@@ -111,15 +111,15 @@ initialize() {
 	}
 } 
 
-11000 { sim.addSubpopSplit("p3", 1000/n, p2); } 
+11000 { sim.addSubpopSplit("p3", asInteger(1000/n), p2); } 
 
 11000 late(){ 
-	p2.setSubpopulationSize(10000/n); //african 
-	p3.setSubpopulationSize(1000/n); //non-african 
+	p2.setSubpopulationSize(asInteger(10000/n)); //african 
+	p3.setSubpopulationSize(asInteger(1000/n)); //non-african 
 } 
 
 11995 early() {
-    p2.setSubpopulationSize(10000/n);
+    p2.setSubpopulationSize(asInteger(10000/n));
 }
 
 11999 late() {
@@ -139,8 +139,8 @@ initialize() {
 12001 early() { 
 	p3.setMigrationRates(p1, 0.00); 
 	p1.setMigrationRates(p3, 0.00); 
-	p1.setSubpopulationSize(10000/n); //african 
-	p3.setSubpopulationSize(1000/n); //non-african 
+	p1.setSubpopulationSize(asInteger(10000/n)); //african 
+	p3.setSubpopulationSize(asInteger(1000/n)); //non-african 
 } 
 
 
