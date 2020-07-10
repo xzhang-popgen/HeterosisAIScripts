@@ -75,17 +75,15 @@ initialize() {
 }
 
 //hs relationship
-1:8900 fitness(m1) {
-	if (hs ==1){ 
-    	h = (0.5)/(1 - 7071.07*(mut.selectionCoeff/n));
-    	if (homozygous) {
-        	return ((1.0 + 0.5*mut.selectionCoeff)*(1.0 + 0.5*mut.selectionCoeff));
-    	} 
-    	else {
-        	return (1.0 + mut.selectionCoeff * h);
-    	}
-   }
-}
+//1:8900 fitness(m1) {
+//    	h = (0.5)/(1 - 7071.07*(mut.selectionCoeff/n));
+//    	if (homozygous) {
+//        	return ((1.0 + 0.5*mut.selectionCoeff)*(1.0 + 0.5*mut.selectionCoeff));
+//    	} 
+//    	else {
+//        	return (1.0 + mut.selectionCoeff * h);
+//    	}
+//}
  
 
 7300 early() { // p2 = Neanderthal
