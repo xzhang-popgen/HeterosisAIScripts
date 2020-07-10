@@ -9,9 +9,9 @@ initialize() {
 	initializeTreeSeq();
 	//nonsynonymous drawn from a DFE from Kim et al.
     initializeMutationType("m1", dominance, "g", -0.01314833*n, 0.186);
-	initializeMutationType("m2", 0.0, "f", 0.0);
+	initializeMutationType("m2", 0.5, "f", 0.0);
 	//noncoding -- assumed neutral here
-	initializeMutationType("m3", 0.0, "f", 0.0);
+	initializeMutationType("m3", 0.5, "f", 0.0);
 	//beneficial -- for the time being, is left out
 	initializeMutationType("m4", 0.0, "f", m4s);	
 	//genomic element: exon and uses a mixture of syn and nonsyn at a 1:2.31 ratio (Huber et al.)
