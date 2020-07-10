@@ -9,11 +9,11 @@ initialize() {
 	// importantly, SLiM computes the fitness of the heterozygote and homozygote as 1+sh and 1+s
 	// dadi and others compute it as 1+2sh and 1+2s
     initializeMutationType("m1", dominance, "g", -0.01314833*n, 0.186);
-	// initializeMutationType("m1", 0.0, "f", 0.0);
+	// initializeMutationType("m1", 0.5, "f", 0.0);
 	//synonymous -- assumed neutral here
-	initializeMutationType("m2", 0.0, "f", 0.0);
+	initializeMutationType("m2", 0.5, "f", 0.0);
 	//noncoding -- assumed neutral here
-	initializeMutationType("m3", 0.0, "f", 0.0);
+	initializeMutationType("m3", 0.5, "f", 0.0);
 	//beneficial -- for the time being, is left out
 	initializeMutationType("m4", 0.5, "f", 0.01*n); //adaptive 	
 	//genomic element: exon and uses a mixture of syn and nonsyn at a 1:2.31 ratio (Huber et al.)
