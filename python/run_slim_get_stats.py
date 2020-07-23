@@ -472,38 +472,52 @@ def update_par_file(region_name,temp_par, new_par,model,growth,dominance,nscale,
     oldfile.close()
     
 
-def calc_ancestry_window (ancestry_file,len_genome):
-    infile = open(ancestry_file,'r')
+def calc_ancestry_window(ancestry_file, len_genome):
+    infile = open(ancestry_file, 'r')
+    start_pos = []
     end_pos = []
-    ancestry = []    
-    line_counter=0
+    ancestry = []
+
+    line_counter = 0
     for line_counter, line in enumerate(infile):
         fields = line.split(',')
         if fields[0] != "start":
+            start_pos.append(float(fields[0]))
             end_pos.append(float(fields[1]))
-            ancestry.append(float(fields[2]))               
+            ancestry.append(float(fields[2]))
+
     infile.close()
-    allpos_bin = np.linspace(0,len_genome,int(len_genome/50000)) #windows of every 50kb
+    allpos_bin = np.linspace(0, len_genome, int(len_genome/50000)) #windows of every 50kb
+    
+    net_pos = [end_pos[x] - start_pos[x] for x in range(len(end_pos))] #calculate end_pos - start_pos for every position
+    for pos in range(len(net_pos)):
+        if net_pos[pos] >= int(50000): #if the calculated difference at that position spans more than one 50kb window
+            num_w = np.ceil(net_pos[pos] / 50000)
+            
+            for i in range(1, int(num_w)): #don't want to include the end_pos value already in the ancestry file
+                end_pos.append(end_pos[pos] - (i*50000))
+                ancestry.append(ancestry[pos])
 
     endpos_digitized = np.digitize(end_pos, allpos_bin)
     end_pos = np.array(end_pos)
     ancestry = np.array(ancestry)
-    
+
     anc_window = []
     anc_pos = []
-    
-    for w in range(1,100):
-        these_pos = end_pos[endpos_digitized==w]
-        these_anc = ancestry[endpos_digitized==w]    
-        
-        if(len(these_pos))>0:
+       
+    for w in range(1,101):
+        these_pos = end_pos[endpos_digitized == w]
+        these_anc = ancestry[endpos_digitized == w]
+
+        if(len(these_pos)) > 0:
             anc_window.append(np.mean(these_anc))
             anc_pos.append(these_pos)
         else:
             anc_window.append(float('nan'))
             anc_pos.append(these_pos)
-        
-    return anc_window    
+
+    return anc_window
+
 
    
 
